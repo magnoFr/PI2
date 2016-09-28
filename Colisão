@@ -1,0 +1,103 @@
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_native_dialog.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+
+//----------Protótipos---------//
+int checa_colisao(int x1, int y1, int h1, int l1, int x2, int y2, int h2, int l2);
+
+
+
+
+
+
+int main()
+{
+
+	al_init();
+
+
+	//---------Ponteiros e paremetros-------//
+
+
+	ALLEGRO_DISPLAY* display = al_create_display(800, 600);
+	ALLEGRO_FONT* font = al_create_builtin_font();
+	ALLEGRO_EVENT_QUEUE* fila_de_evento = NULL;
+
+
+
+
+	//-----------Inicialização-----------//
+
+	al_init_font_addon();
+	al_init_ttf_addon();
+
+	al_clear_to_color(al_map_rgb(0, 0, 0));
+	al_draw_text(font, al_map_rgb(255, 255, 255), 400, 300, ALLEGRO_ALIGN_CENTER, "Welcome to Allegro!");
+	al_init_image_addon();
+	al_init_primitives_addon();
+	al_install_keyboard();
+	fila_de_evento = al_create_event_queue();
+	al_register_event_source(fila_de_evento, al_get_display_event_source(display));
+	al_register_event_source(fila_de_evento, al_get_keyboard_event_source());
+	bool sair = false;
+	int x = 110, y = 55;
+	//----------------jogo--------------//
+	while (!sair) {
+			
+
+		ALLEGRO_EVENT evento;
+		al_wait_for_event(fila_de_evento, &evento);
+		
+			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+				sair = true;
+
+
+
+			if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+				if (evento.keyboard.keycode == ALLEGRO_KEY_DOWN)
+					
+					x= x+10;
+
+			}
+			al_draw_filled_rectangle(400, 55, 430, 30, al_map_rgb(333, 444, 555));
+			al_draw_filled_circle(x, y, 30, al_map_rgb(250, 0, 0));
+
+			if (checa_colisao(x - 25, y - 25, x + 5, y + 5, 400, 55, 430, 30) == true) {
+				
+				al_draw_filled_circle(x, y, 30, al_map_rgb(150, 0, 0));
+
+			}
+			
+			else 
+				al_draw_filled_circle(x, y, 30, al_map_rgb(250, 0, 0));
+
+
+			al_flip_display();
+			al_clear_to_color(al_map_rgb(0, 0, 0));
+		
+
+}
+	al_destroy_display(display);
+	al_destroy_event_queue(fila_de_evento);
+	return 0;
+}
+
+
+
+//--------Funções--------//
+int checa_colisao(x1, y1, h1, l1, x2, y2, h2, l2) {
+
+	if ((x1 > x2 + l2) || (y1 > y2 + h2) || (x2 > x1 + l1) || (y2 > y1 + h1))
+		return false;
+
+	else
+		return true;
+
+
+}
