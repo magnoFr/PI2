@@ -68,7 +68,7 @@ int main()
 			al_draw_filled_rectangle(400, 55, 430, 30, al_map_rgb(333, 444, 555));
 			al_draw_filled_circle(x, y, 30, al_map_rgb(250, 0, 0));
 
-			if (checa_colisao(x - 25, y - 25, x + 5, y + 5, 400, 55, 430, 30) == true) {
+			if (checa_colisao(x - 25, y - 25, x - 2, y - 2, 400, 55, 430, 30) == true) {
 				
 				al_draw_filled_circle(x, y, 30, al_map_rgb(150, 0, 0));
 
