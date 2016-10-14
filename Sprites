@@ -1,0 +1,164 @@
+#include <allegro5\allegro.h>
+#include <allegro5\allegro_font.h>
+#include <allegro5\allegro_native_dialog.h>
+#include <allegro5\allegro_ttf.h>
+#include <allegro5\allegro_image.h>
+#include <allegro5\allegro_primitives.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+
+//----------Protótipos---------//
+int checa_colisao(int x1, int y1, int h1, int l1, int x2, int y2, int h2, int l2);
+
+
+
+
+
+
+int main()
+{
+
+	al_init();
+
+
+	//---------Ponteiros e paremetros-------//
+
+
+	ALLEGRO_DISPLAY* display = al_create_display(800, 600);
+	ALLEGRO_FONT* font = al_create_builtin_font();
+	ALLEGRO_EVENT_QUEUE* fila_de_evento = NULL;
+	ALLEGRO_BITMAP *cenario = NULL, *player = NULL;
+	ALLEGRO_TIMER *tempo = NULL;
+
+
+	//-----------Inicialização-----------//
+
+	al_init_font_addon();
+	al_init_ttf_addon();
+
+	al_clear_to_color(al_map_rgb(0, 0, 0));
+	al_draw_text(font, al_map_rgb(255, 255, 255), 400, 300, ALLEGRO_ALIGN_CENTER, "Welcome to Allegro!");
+	al_init_image_addon();
+	al_init_primitives_addon();
+	al_install_keyboard();
+
+	//--------eventos--------//
+	ALLEGRO_KEYBOARD_STATE keystate;
+	tempo = al_create_timer(1.0 / 60.0);
+	fila_de_evento = al_create_event_queue();
+	al_register_event_source(fila_de_evento, al_get_timer_event_source(tempo));
+	al_register_event_source(fila_de_evento, al_get_display_event_source(display));
+	al_register_event_source(fila_de_evento, al_get_keyboard_event_source());
+	bool sair = false, desenhar = false, movimentando = false;
+	
+	//-----------Bitmaps-----------//
+	player = al_load_bitmap("C:/Users/Gutinho/Documents/Visual Studio 2015/Projects/Teste/Teste/personagem.png");
+	cenario = al_load_bitmap("C:/Users/Gutinho/Documents/Visual Studio 2015/Projects/Teste/Teste/cenario.png");
+	if (!cenario) { printf("erro"); return -1; }
+
+	//-----------valores pré jogo---------//
+	int l = 32;
+	enum direcao {baixo,esquerda,direita,cima};
+	float x = 110, y = 55, v = 2;
+	int dir = baixo, AnimaX = l, AnimaY = 0;
+	al_start_timer(tempo);
+	//----------------jogo--------------//
+	while (!sair) {
+			
+
+		ALLEGRO_EVENT evento;
+		al_wait_for_event(fila_de_evento, &evento);
+		al_get_keyboard_state(&keystate);
+
+			if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+				sair = true;
+
+
+
+			else if (evento.type == ALLEGRO_EVENT_TIMER) {
+				
+				movimentando = true;
+
+				if (al_key_down(&keystate, ALLEGRO_KEY_DOWN)) {
+
+					y += v;
+					dir = baixo;
+				}
+
+				else if (al_key_down(&keystate, ALLEGRO_KEY_UP)) {
+
+					y -= v;
+					dir = cima;
+				}
+
+				else if (al_key_down(&keystate, ALLEGRO_KEY_RIGHT)) {
+
+					x += v;
+					dir = direita;
+				}
+
+				else if (al_key_down(&keystate, ALLEGRO_KEY_LEFT)) {
+
+					x -= v;
+					dir = esquerda;
+				}
+
+				else
+					movimentando = false;
+
+				if (movimentando)
+					AnimaX += (al_get_bitmap_width(player));
+				else
+					AnimaX = l;
+
+				if (AnimaX >= al_get_bitmap_width(player))
+					AnimaX = 0;
+				
+
+				desenhar = true;
+				AnimaY = dir;
+
+			}
+			if (desenhar) {
+				al_draw_bitmap(cenario, 0, 0, 0);
+				al_draw_filled_rectangle(400, 55, 430, 30, al_map_rgb(333, 444, 555));
+				al_draw_filled_rectangle(110 - 25, 55 - 25, 110 + 25, 55 + 25 - 2, al_map_rgb(333, 444, 555));
+
+
+				if (checa_colisao(x - 25, y - 25, x + 25, y + 25, 400, 30, 430, 55) == true) {
+
+					al_draw_filled_circle(x, y, 30, al_map_rgb(150, 0, 0));
+
+				}
+
+				al_draw_bitmap(player, 200, 200, NULL);
+				al_draw_bitmap_region(player, AnimaX, AnimaY * al_get_bitmap_height(player) /8, 32, 32, x, y, NULL);
+
+
+				al_flip_display();
+				al_clear_to_color(al_map_rgb(0, 0, 0));
+
+			}
+}
+	al_destroy_display(display);
+	al_destroy_event_queue(fila_de_evento);
+	al_destroy_bitmap(cenario);
+	al_destroy_bitmap(player);
+	al_destroy_timer(tempo);
+	return 0;
+}
+
+
+
+//--------Funções--------//
+int checa_colisao(x1, y1, l1, h1, x2, y2, l2, h2) {
+	al_draw_filled_rectangle(x2, y2, l2, h2, al_map_rgb(333, 444, 555));
+	if ((x1 >  l2-1) || (y1 >  h2-1) || (x2 >  l1-1) || (y2 > h1-1))
+		return false;
+
+	else
+		return true;
+
+
+}
